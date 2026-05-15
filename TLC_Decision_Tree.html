@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malawi Mathematics — TLC Decision Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --tlc1: #185FA5; --tlc1-l: #E6F1FB; --tlc1-m: #B5D4F4;
+  --tlc2: #0F6E56; --tlc2-l: #E1F5EE; --tlc2-m: #9FE1CB;
+  --tlc3: #854F0B; --tlc3-l: #FAEEDA; --tlc3-m: #FAC775;
+  --tlc4: #993556; --tlc4-l: #FBEAF0; --tlc4-m: #F4C0D1;
+  --tlc5: #3B6D11; --tlc5-l: #EAF3DE; --tlc5-m: #C0DD97;
+  --ink: #1a1a18;
+  --ink2: #4a4a46;
+  --ink3: #8a8a84;
+  --surface: #fafaf8;
+  --card: #ffffff;
+  --border: #e4e4de;
+  --yes-bg: #e8f7ef; --yes-ink: #166534; --yes-border: #a3d9b8;
+  --no-bg: #fde8e8;  --no-ink: #991b1b;  --no-border: #f5b0b0;
+  --focus-bg: #f0f5fc; --focus-border: #c5d9f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── Header ── */
+.site-header {
+  background: #1F3864;
+  padding: 2rem 1.5rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg, transparent, transparent 40px,
+    rgba(255,255,255,0.02) 40px, rgba(255,255,255,0.02) 41px
+  );
+}
+.header-inner { max-width: 720px; margin: 0 auto; position: relative; }
+.header-eyebrow {
+  font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); margin-bottom: 0.4rem; font-weight: 500;
+}
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  color: #fff; line-height: 1.15; margin-bottom: 0.5rem;
+}
+.header-sub {
+  font-size: 0.875rem; color: rgba(255,255,255,0.6); font-weight: 300;
+}
+
+/* ── Mode toggle ── */
+.mode-bar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 1.5rem;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.mode-inner {
+  max-width: 720px; margin: 0 auto;
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+.mode-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem; font-weight: 500;
+  padding: 0.35rem 0.9rem; border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--ink2); cursor: pointer;
+  transition: all 0.15s;
+}
+.mode-btn:hover { background: var(--surface); color: var(--ink); }
+.mode-btn.active {
+  background: #1F3864; color: #fff; border-color: #1F3864;
+}
+.mode-label {
+  font-size: 0.75rem; color: var(--ink3); margin-right: auto;
+}
+
+/* ── Main layout ── */
+.main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; }
+
+/* ── Progress bar ── */
+.progress-track {
+  display: flex; gap: 0.3rem; margin-bottom: 1.5rem; align-items: center;
+}
+.prog-seg {
+  height: 4px; flex: 1; border-radius: 2px;
+  background: var(--border); cursor: pointer; transition: background 0.2s;
+  position: relative;
+}
+.prog-seg.done { opacity: 0.4; }
+.prog-seg.active { }
+.prog-seg .prog-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink); color: #fff; font-size: 0.65rem;
+  padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.prog-seg:hover .prog-tip { opacity: 1; }
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 0.35rem;
+  flex-wrap: wrap; margin-bottom: 1rem;
+  font-size: 0.75rem; color: var(--ink3);
+}
+.bc-sep { color: var(--border); }
+.bc-ans {
+  display: inline-flex; align-items: center;
+  padding: 1px 6px; border-radius: 4px;
+  font-weight: 500; font-size: 0.68rem;
+}
+.bc-ans.yes { background: var(--yes-bg); color: var(--yes-ink); }
+.bc-ans.no  { background: var(--no-bg);  color: var(--no-ink); }
+.restart-btn {
+  margin-left: auto; font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem; color: var(--ink3); background: none;
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 2px 8px; cursor: pointer;
+}
+.restart-btn:hover { color: var(--ink); border-color: var(--ink2); }
+
+/* ── TLC banner ── */
+.tlc-banner {
+  display: flex; align-items: stretch;
+  border-radius: 10px; overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.tlc-num-box {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 1rem 1.25rem; min-width: 70px;
+  font-family: 'DM Serif Display', serif;
+}
+.tlc-num-box .num { font-size: 1.8rem; color: #fff; line-height: 1; }
+.tlc-num-box .lbl { font-size: 0.6rem; color: rgba(255,255,255,0.7); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+.tlc-title-box {
+  flex: 1; display: flex; align-items: center;
+  padding: 0.9rem 1.1rem;
+}
+.tlc-title-box span {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem; line-height: 1.3;
+}
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 0.8rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.q-head {
+  padding: 0.9rem 1.1rem 0.8rem;
+  background: #f5f5f0;
+  border-bottom: 1px solid var(--border);
+}
+.q-label {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 0.25rem;
+}
+.q-text {
+  font-size: 1rem; font-weight: 500; color: var(--ink); line-height: 1.4;
+}
+.q-looks {
+  padding: 0.75rem 1.1rem; border-bottom: 1px solid var(--border);
+}
+.looks-title {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--ink3); margin-bottom: 0.4rem;
+}
+.looks-grid {
+  display: flex; flex-wrap: wrap; gap: 0.3rem;
+}
+.look-chip {
+  font-size: 0.75rem; padding: 3px 8px; border-radius: 5px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--ink2);
+}
+
+/* ── Branch buttons ── */
+.branch-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+  padding: 0.75rem 1.1rem;
+}
+.branch-btn {
+  font-family: 'DM Sans', sans-serif;
+  border: none; border-radius: 8px; padding: 0.75rem 1rem;
+  cursor: pointer; text-align: left; transition: all 0.15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.branch-btn .b-ans {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.branch-btn .b-dest { font-size: 0.8rem; font-weight: 400; }
+.branch-btn.yes-btn {
+  background: var(--yes-bg); color: var(--yes-ink);
+  border: 1px solid var(--yes-border);
+}
+.branch-btn.yes-btn:hover { background: #d4f0e2; }
+.branch-btn.no-btn {
+  background: var(--no-bg); color: var(--no-ink);
+  border: 1px solid var(--no-border);
+}
+.branch-btn.no-btn:hover { background: #fad5d5; }
+
+/* ── Multi-branch (Q1a style) ── */
+.multi-branch { padding: 0.75rem 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.multi-btn {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--focus-bg); border: 1px solid var(--focus-border);
+  border-radius: 8px; padding: 0.7rem 1rem; cursor: pointer;
+  text-align: left; transition: all 0.15s; color: var(--ink);
+}
+.multi-btn:hover { background: #e4eef9; border-color: #a8c4e0; }
+.multi-btn .mb-label { font-size: 0.85rem; font-weight: 500; margin-bottom: 2px; }
+.multi-btn .mb-focus { font-size: 0.75rem; color: var(--ink3); }
+
+/* ── Focus result ── */
+.focus-result {
+  border-radius: 10px; overflow: hidden; margin-bottom: 0.8rem;
+  border: 1px solid var(--focus-border);
+  animation: slideIn 0.25s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.focus-header {
+  background: #1F3864; padding: 0.6rem 1.1rem;
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255,255,255,0.7);
+}
+.focus-body { background: var(--focus-bg); padding: 0.9rem 1.1rem; }
+.focus-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem; color: var(--ink); margin-bottom: 0.6rem; line-height: 1.3;
+}
+.focus-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.9rem; }
+.focus-tag {
+  font-size: 0.75rem; padding: 3px 9px; border-radius: 5px;
+  background: var(--card); border: 1px solid var(--focus-border); color: var(--ink2);
+}
+.focus-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.act-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+  padding: 0.4rem 0.9rem; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--ink2);
+  transition: all 0.15s;
+}
+.act-btn:hover { background: var(--surface); color: var(--ink); }
+.act-btn.primary {
+  background: #1F3864; color: #fff; border-color: #1F3864;
+}
+.act-btn.primary:hover { background: #263f73; }
+
+/* ── Move on ── */
+.move-on-box {
+  background: var(--yes-bg); border: 1px solid var(--yes-border);
+  border-radius: 10px; padding: 1rem 1.1rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  animation: slideIn 0.25s ease; margin-bottom: 0.8rem;
+}
+.move-on-check {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--yes-ink); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.move-on-text .mot { font-size: 0.7rem; color: var(--yes-ink); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.move-on-text .mod { font-size: 0.9rem; font-weight: 500; color: var(--yes-ink); }
+.move-on-btn {
+  margin-left: auto; font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; padding: 0.4rem 0.9rem; border-radius: 7px;
+  background: var(--yes-ink); color: #fff; border: none; cursor: pointer;
+  white-space: nowrap; transition: opacity 0.15s;
+}
+.move-on-btn:hover { opacity: 0.85; }
+
+/* ── Continue box ── */
+.continue-box {
+  background: #f5f5f0; border: 1px solid var(--border);
+  border-radius: 10px; padding: 1rem 1.1rem;
+  animation: slideIn 0.25s ease;
+}
+.continue-box .ct { font-weight: 500; margin-bottom: 0.25rem; }
+.continue-box .cs { font-size: 0.85rem; color: var(--ink2); }
+
+/* ── Arrow connector ── */
+.arrow-conn {
+  text-align: center; color: var(--ink3); font-size: 1.2rem;
+  padding: 0.15rem 0; margin-bottom: 0.15rem;
+}
+
+/* ── Overview mode ── */
+.ov-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.6rem; margin-bottom: 2rem;
+}
+.ov-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.9rem 1rem; cursor: pointer; background: var(--card);
+  transition: all 0.15s; display: flex; flex-direction: column; gap: 0.25rem;
+}
+.ov-card:hover { border-color: #aaa; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.ov-num { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.ov-title { font-size: 0.88rem; font-weight: 500; color: var(--ink); line-height: 1.35; }
+
+.ov-tlc-section { margin-bottom: 2rem; }
+.ov-tlc-header {
+  display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+.ov-tlc-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.ov-tlc-name { font-weight: 500; font-size: 0.95rem; }
+.ov-focus-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.ov-focus-item {
+  border-radius: 8px; padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border); background: var(--card);
+  cursor: pointer; transition: all 0.15s;
+}
+.ov-focus-item:hover { border-color: #bbb; background: var(--surface); }
+.ov-fi-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 2px; }
+.ov-fi-tags { font-size: 0.75rem; color: var(--ink3); }
+
+/* ── Footer ── */
+.site-footer {
+  text-align: center; padding: 1.5rem; font-size: 0.75rem;
+  color: var(--ink3); border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+@media (max-width: 480px) {
+  .branch-row { grid-template-columns: 1fr; }
+  .ov-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-eyebrow">Ministry of Education · Malawi</div>
+    <h1 class="header-title">TLC Decision Tree</h1>
+    <p class="header-sub">Select the right Teacher Learning Circle focus using observation, learner work and coaching evidence</p>
+  </div>
+</header>
+
+<div class="mode-bar">
+  <div class="mode-inner">
+    <span class="mode-label" id="mode-label">Guided walkthrough</span>
+    <button class="mode-btn active" id="btn-guided" onclick="setMode('guided')">Guided walkthrough</button>
+    <button class="mode-btn" id="btn-overview" onclick="setMode('overview')">All TLCs overview</button>
+  </div>
+</div>
+
+<main class="main" id="app"></main>
+
+<footer class="site-footer">Malawi Mathematics Teacher Learning Circles</footer>
+
+<script>
+const TLCS = [
+  { id:'tlc1', num:1, color:'#185FA5', light:'#E6F1FB', mid:'#B5D4F4',
+    title:'Understanding the Teacher Guide',
+    qs:[{
+      id:'q1', label:'Question 1',
+      text:'Are teachers confident navigating and using the Teacher Guide?',
+      looks:['Using topic openers','Using lesson guidance','Understanding lesson structure','Using support and extend','Using reasoning prompts'],
+      no:{type:'sub',id:'q1a'}, yes:{type:'sub',id:'q1b'}
+    }],
+    subs:{
+      q1a:{ id:'q1a', label:'Question 1a', type:'multi',
+        text:'Which part of the Teacher Guide needs further support?',
+        looks:[],
+        branches:[
+          {label:'Teachers are not using topic openers effectively',
+           focus:['Subject knowledge','Key representations','Key language','Progression across the topic'],
+           name:'Topic openers'},
+          {label:'Teachers are not using lesson guidance effectively',
+           focus:['Guidance','Success criteria','Key questions','Key sentences','Reflection','Reasoning','Support and extend'],
+           name:'Using lesson guidance'},
+          {label:'Teachers are not preparing effectively before lessons',
+           focus:['Reading lessons in advance','Preparing representations','Identifying misconceptions','Planning key questions','Preparing resources'],
+           name:'Preparing to teach the lesson'},
+        ]
+      },
+      q1b:{ id:'q1b', label:'Question 1b',
+        text:'Are teachers implementing the materials flexibly and responsively?',
+        looks:['Rushing to finish pages','Workbook copying','Mechanical teaching','Moving on despite misunderstanding','Prioritising completion over understanding'],
+        no:{type:'result',name:'Understanding implementation expectations',
+            focus:['Understanding over completion','Responsive teaching','Teacher professional judgement','Workbook thinking rather than copying','Maintaining high expectations']},
+        yes:{type:'sub',id:'q1c'}
+      },
+      q1c:{ id:'q1c', label:'Question 1c',
+        text:'Are learners working independently and thinking in the workbook?',
+        looks:['Learners explaining answers','Learners thinking before recording','Workbook tasks connected to modelling','Limited copying from peers or board'],
+        no:{type:'result',name:'Developing independent thinking through workbook tasks',
+            focus:['Workbook as thinking','Independent practice','Partner discussion before recording','Maintaining cognitive demand','Reducing copying']},
+        yes:{type:'move',to:'TLC 2',toIdx:1}
+      }
+    }
+  },
+  { id:'tlc2', num:2, color:'#0F6E56', light:'#E1F5EE', mid:'#9FE1CB',
+    title:'Episodic teaching & responsive assessment',
+    qs:[{
+      id:'q2', label:'Question 2',
+      text:'Are lessons broken into clear small episodes of learning?',
+      looks:['Short teacher input','Learner practice','Discussion','Assessment before moving on'],
+      no:{type:'result',name:'Episodic teaching',
+          focus:['Lesson flow','Pacing','Modelling','Transitions','Reflection','Balancing teacher input and learner thinking']},
+      yes:{type:'sub',id:'q2b'}
+    }],
+    subs:{
+      q2b:{ id:'q2b', label:'Question 2b',
+        text:'Are learners actively participating throughout the lesson?',
+        looks:['Whole-class response','Partner talk','All learners answering','Minimal passive listening'],
+        no:{type:'result',name:'Maximum participation strategies',
+            focus:['Think-pair-share','Question-pause-nominate','Fingers','Whole-class response','Participation routines']},
+        yes:{type:'sub',id:'q2c'}
+      },
+      q2c:{ id:'q2c', label:'Question 2c',
+        text:'Are teachers checking understanding throughout lessons?',
+        looks:['Questioning','Wait time','Adapting teaching based on responses','Noticing misconceptions'],
+        no:{type:'result',name:'Responsive assessment for learning',
+            focus:['Responsive teaching','Wait time','Questioning','Checking all learners','Deciding when to move on']},
+        yes:{type:'sub',id:'q2d'}
+      },
+      q2d:{ id:'q2d', label:'Question 2d',
+        text:'Can teachers identify and respond to misconceptions?',
+        looks:['Teachers understanding why learners struggle','Misconceptions addressed during the lesson','Support matched to learner need','Teacher explanations revealing conceptual understanding'],
+        no:{type:'result',name:'Diagnosing and responding to misconceptions',
+            focus:['Misconception vs mistake','Analysing learner thinking','Responding during the lesson','Adapting support','Common misconceptions in mathematics']},
+        yes:{type:'sub',id:'q2e'}
+      },
+      q2e:{ id:'q2e', label:'Question 2e',
+        text:'Are teachers effectively supporting and extending learners?',
+        looks:['Support during lessons','Challenge questions','Reasoning extensions','Extension through depth rather than more work'],
+        no:{type:'result',name:'Support and extend',
+            focus:['Scaffolding','Challenge','Depth','Misconceptions','Flexible support']},
+        yes:{type:'move',to:'TLC 3',toIdx:2}
+      }
+    }
+  },
+  { id:'tlc3', num:3, color:'#854F0B', light:'#FAEEDA', mid:'#FAC775',
+    title:'Representations, gesture & mathematical language',
+    qs:[{
+      id:'q3', label:'Question 3',
+      text:'Are representations helping learners see mathematical structure?',
+      looks:['Clear models','Purposeful representations','Progression from concrete to pictorial to abstract','Representations large enough to see'],
+      no:{type:'result',name:'Choosing and using representations',
+          focus:['Selecting representations intentionally','Highlighting mathematical structure','Variation','Modelling clearly']},
+      yes:{type:'sub',id:'q3b'}
+    }],
+    subs:{
+      q3b:{ id:'q3b', label:'Question 3b',
+        text:'Are teachers using gesture effectively?',
+        looks:['Circling groups','Highlighting parts and wholes','Gestures matching language','Gestures drawing attention to structure'],
+        no:{type:'result',name:'Gesture and mathematical structure',
+            focus:['Gesture for composition','Gesture for counting','Gesture for comparison','Synchronising gesture and language']},
+        yes:{type:'sub',id:'q3c'}
+      },
+      q3c:{ id:'q3c', label:'Question 3c',
+        text:'Are teachers using key sentences consistently?',
+        looks:['Repeated sentence structures','Learners speaking in full mathematical sentences','Language linked to representations'],
+        no:{type:'result',name:'Using key sentences',
+            focus:['Mathematical precision','Repeated structures','Rehearsing language','Sentence stems']},
+        yes:{type:'sub',id:'q3d'}
+      },
+      q3d:{ id:'q3d', label:'Question 3d',
+        text:'Is code-switching supporting understanding effectively?',
+        looks:['Accurate mathematical language','Purposeful switching','Learners understanding key terms','Limited over-translation'],
+        no:{type:'result',name:'Effective code-switching',
+            focus:['Maintaining mathematical meaning','Linking English and Chichewa','When to code-switch','Avoiding unnecessary translation']},
+        yes:{type:'move',to:'TLC 4',toIdx:3}
+      }
+    }
+  },
+  { id:'tlc4', num:4, color:'#993556', light:'#FBEAF0', mid:'#F4C0D1',
+    title:'Reasoning and learner talk',
+    qs:[{
+      id:'q4', label:'Question 4',
+      text:'Are learners explaining and justifying their thinking?',
+      looks:['Learners explaining answers','Learners describing patterns','Learners using representations to explain'],
+      no:{type:'result',name:'Developing mathematical reasoning',
+          focus:['Explaining thinking','Justifying answers','Noticing patterns','Convincing others']},
+      yes:{type:'sub',id:'q4b'}
+    }],
+    subs:{
+      q4b:{ id:'q4b', label:'Question 4b',
+        text:'Are teachers using reasoning prompts effectively?',
+        looks:['"How do you know?"','"Convince me."','"Do you agree?"','"What do you notice?"','"What could the answer be?"'],
+        no:{type:'result',name:'Reasoning prompts and questions',
+            focus:['Questioning for reasoning','Extending thinking','Discussion prompts','Mathematical talk']},
+        yes:{type:'sub',id:'q4c'}
+      },
+      q4c:{ id:'q4c', label:'Question 4c',
+        text:'Are learners discussing mathematics with each other?',
+        looks:['Partner talk','Build/challenge discussions','Learners responding to each other','Discussion routines'],
+        no:{type:'result',name:'Learner talk and discussion routines',
+            focus:['Agree/disagree','Build/challenge','Discussion routines','Mathematical communication']},
+        yes:{type:'move',to:'TLC 5',toIdx:4}
+      }
+    }
+  },
+  { id:'tlc5', num:5, color:'#3B6D11', light:'#EAF3DE', mid:'#C0DD97',
+    title:'Foundational number sense',
+    qs:[{
+      id:'q5', label:'Question 5',
+      text:'Are learners secure with subitising?',
+      looks:['Quick recognition of small quantities','Use of dot patterns','Learners not counting everything'],
+      no:{type:'result',name:'Subitising and number sense',
+          focus:['Perceptual subitising','Conceptual subitising','Dot patterns','Finger patterns','Five frames']},
+      yes:{type:'sub',id:'q5b'}
+    }],
+    subs:{
+      q5b:{ id:'q5b', label:'Question 5b',
+        text:'Are learners counting accurately using one-to-one correspondence?',
+        looks:['One number per object','Keeping track','Accurate totals','Stopping at the correct number'],
+        no:{type:'result',name:'Counting principles',
+            focus:['One-to-one correspondence','Cardinality','Stable order','Abstraction','Order irrelevance']},
+        yes:{type:'sub',id:'q5c'}
+      },
+      q5c:{ id:'q5c', label:'Question 5c',
+        text:'Do learners understand composition and part-whole relationships?',
+        looks:['Flexible thinking about number','Part-whole language','Understanding numbers are made of parts','Use of gestures and representations'],
+        no:{type:'result',name:'Composition and part-whole understanding',
+            focus:['Composition','Part-whole','Conceptual subitising','Five frames','Gesture']},
+        yes:{type:'sub',id:'q5d'}
+      },
+      q5d:{ id:'q5d', label:'Question 5d',
+        text:'Are learners struggling with place value structures?',
+        looks:['Counting by ones only','Confusion with tens and ones','Weak grouping understanding'],
+        yes:{type:'result',name:'Place value structures',
+             focus:['Ten-and-a-bit','Unitising','Grouping','Bundles','Tens and ones']},
+        no:{type:'continue'}
+      }
+    }
+  },
+];
+
+let state = { mode:'guided', tlcIdx:0, currentQ:null, path:[], done:false };
+
+function tlc(){ return TLCS[state.tlcIdx]; }
+function getQ(id){
+  const t = tlc();
+  if(!id) return t.qs[0];
+  const fromQs = t.qs.find(q=>q.id===id);
+  if(fromQs) return fromQs;
+  return t.subs && t.subs[id] ? t.subs[id] : null;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  document.getElementById('btn-guided').className = 'mode-btn' + (state.mode==='guided'?' active':'');
+  document.getElementById('btn-overview').className = 'mode-btn' + (state.mode==='overview'?' active':'');
+  document.getElementById('mode-label').textContent = state.mode==='guided' ? 'Guided walkthrough' : 'All TLCs overview';
+  if(state.mode==='overview'){ renderOverview(app); return; }
+  renderGuided(app);
+}
+
+function renderGuided(app){
+  const t = tlc();
+
+  // Progress
+  const track = document.createElement('div');
+  track.className = 'progress-track';
+  TLCS.forEach((tt,i)=>{
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg' + (i < state.tlcIdx ? ' done' : '');
+    seg.style.background = i <= state.tlcIdx ? tt.color : '#e4e4de';
+    seg.style.opacity = i < state.tlcIdx ? '0.35' : '1';
+    seg.innerHTML = `<span class="prog-tip">TLC ${tt.num}: ${tt.title}</span>`;
+    seg.onclick = ()=>{ state.tlcIdx=i; state.currentQ=null; state.path=[]; state.done=false; render(); };
+    track.appendChild(seg);
+  });
+  app.appendChild(track);
+
+  // Banner
+  const banner = document.createElement('div');
+  banner.className = 'tlc-banner';
+  banner.innerHTML = `
+    <div class="tlc-num-box" style="background:${t.color}">
+      <span class="num">${t.num}</span>
+      <span class="lbl">TLC</span>
+    </div>
+    <div class="tlc-title-box" style="background:${t.light}">
+      <span style="color:${t.color}">${t.title}</span>
+    </div>`;
+  app.appendChild(banner);
+
+  // Breadcrumb
+  if(state.path.length){
+    const bc = document.createElement('div');
+    bc.className = 'breadcrumb';
+    state.path.forEach((p,i)=>{
+      if(i>0){ const sep=document.createElement('span'); sep.className='bc-sep'; sep.textContent='›'; bc.appendChild(sep); }
+      const item = document.createElement('span');
+      const shortQ = p.qtext.length > 38 ? p.qtext.slice(0,38)+'…' : p.qtext;
+      item.innerHTML = `<span class="bc-ans ${p.ans==='yes'?'yes':'no'}">${p.ans.toUpperCase()}</span> ${shortQ}`;
+      bc.appendChild(item);
+    });
+    const rb = document.createElement('button');
+    rb.className = 'restart-btn'; rb.textContent = '↩ Restart';
+    rb.onclick = ()=>{ state.path=[]; state.currentQ=null; state.done=false; render(); };
+    bc.appendChild(rb);
+    app.appendChild(bc);
+  }
+
+  // Current question
+  const qid = state.currentQ || (t.qs[0] && t.qs[0].id);
+  const q = getQ(qid);
+  if(!q || state.done) return;
+
+  if(q.type==='multi'){
+    renderMultiQ(app, q, t);
+  } else {
+    renderQ(app, q, t);
+  }
+}
+
+function renderQ(app, q, t){
+  const card = document.createElement('div');
+  card.className = 'q-card';
+  card.innerHTML = `
+    <div class="q-head">
+      <div class="q-label">${q.label}</div>
+      <div class="q-text">${q.text}</div>
+    </div>
+    ${q.looks && q.looks.length ? `
+    <div class="q-looks">
+      <div class="looks-title">Look for</div>
+      <div class="looks-grid">${q.looks.map(l=>`<span class="look-chip">${l}</span>`).join('')}</div>
+    </div>` : ''}
+    <div class="branch-row">
+      <button class="branch-btn no-btn" onclick="answer('no','${q.id}')">
+        <span class="b-ans">No</span>
+        <span class="b-dest">${getBranchLabel(q.no)}</span>
+      </button>
+      <button class="branch-btn yes-btn" onclick="answer('yes','${q.id}')">
+        <span class="b-ans">Yes</span>
+        <span class="b-dest">${getBranchLabel(q.yes)}</span>
+      </button>
+    </div>`;
+  app.appendChild(card);
+}
+
+function getBranchLabel(branch){
+  if(!branch) return '';
+  if(branch.type==='result') return 'Needs focus — see below';
+  if(branch.type==='sub') return 'Next question →';
+  if(branch.type==='move') return 'Move on to ' + branch.to + ' →';
+  if(branch.type==='continue') return 'Continue monitoring →';
+  return '';
+}
+
+function renderMultiQ(app, q, t){
+  const card = document.createElement('div');
+  card.className = 'q-card';
+  let inner = `
+    <div class="q-head">
+      <div class="q-label">${q.label}</div>
+      <div class="q-text">${q.text}</div>
+    </div>
+    <div class="multi-branch">`;
+  q.branches.forEach((b,i)=>{
+    inner += `<button class="multi-btn" onclick="pickBranch(${i},'${q.id}')">
+      <div class="mb-label">${b.label}</div>
+      <div class="mb-focus">Focus: ${b.focus.slice(0,3).join(', ')}${b.focus.length>3?'…':''}</div>
+    </button>`;
+  });
+  inner += '</div>';
+  card.innerHTML = inner;
+  app.appendChild(card);
+}
+
+function answer(ans, qid){
+  const q = getQ(qid);
+  state.path.push({ qid, ans, qtext: q.text });
+  const branch = ans==='yes' ? q.yes : q.no;
+  if(!branch) return;
+  if(branch.type==='sub'){ state.currentQ=branch.id; render(); return; }
+  if(branch.type==='result'){ showResult(branch); return; }
+  if(branch.type==='move'){ showMove(branch); return; }
+  if(branch.type==='continue'){ showContinue(); return; }
+}
+
+function pickBranch(idx, qid){
+  const q = getQ(qid);
+  const b = q.branches[idx];
+  state.path.push({ qid, ans: b.label, qtext: q.text });
+  showResult({ name: b.name, focus: b.focus });
+}
+
+function showResult(res){
+  state.done = true;
+  render();
+  const app = document.getElementById('app');
+  const t = tlc();
+  const box = document.createElement('div');
+  box.className = 'focus-result';
+  box.innerHTML = `
+    <div class="focus-header">Recommended TLC focus</div>
+    <div class="focus-body">
+      <div class="focus-title">${res.name}</div>
+      <div class="focus-tags">${(res.focus||[]).map(f=>`<span class="focus-tag">${f}</span>`).join('')}</div>
+      <div class="focus-actions">
+        <button class="act-btn" onclick="restartTLC()">↩ Re-assess this TLC</button>
+        ${state.tlcIdx < TLCS.length-1 ? `<button class="act-btn primary" onclick="goNext()">Continue to TLC ${state.tlcIdx+2} →</button>` : ''}
+      </div>
+    </div>`;
+  app.appendChild(box);
+  box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function showMove(branch){
+  state.done = true;
+  render();
+  const app = document.getElementById('app');
+  const box = document.createElement('div');
+  box.className = 'move-on-box';
+  box.innerHTML = `
+    <div class="move-on-check">✓</div>
+    <div class="move-on-text">
+      <div class="mot">All areas secure</div>
+      <div class="mod">Ready for ${branch.to} — ${TLCS[branch.toIdx].title}</div>
+    </div>
+    <button class="move-on-btn" onclick="goToTLC(${branch.toIdx})">Start ${branch.to} →</button>`;
+  app.appendChild(box);
+  box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function showContinue(){
+  state.done = true;
+  render();
+  const app = document.getElementById('app');
+  const box = document.createElement('div');
+  box.className = 'continue-box';
+  box.innerHTML = `
+    <div class="ct">Continue monitoring, coaching and responsive TLC selection</div>
+    <div class="cs">Learners are showing strong foundational number sense. Maintain regular observation and adjust as needed.</div>`;
+  app.appendChild(box);
+  box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function restartTLC(){ state.path=[]; state.currentQ=null; state.done=false; render(); }
+function goNext(){ goToTLC(state.tlcIdx+1); }
+function goToTLC(i){ state.tlcIdx=i; state.currentQ=null; state.path=[]; state.done=false; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function setMode(m){ state.mode=m; render(); }
+
+function renderOverview(app){
+  const grid = document.createElement('div');
+  grid.className = 'ov-grid';
+  TLCS.forEach((t,i)=>{
+    const c = document.createElement('div');
+    c.className = 'ov-card';
+    c.style.borderTopColor = t.color;
+    c.style.borderTopWidth = '3px';
+    c.innerHTML = `<div class="ov-num" style="color:${t.color}">TLC ${t.num}</div><div class="ov-title">${t.title}</div>`;
+    c.onclick = ()=>{ state.mode='guided'; state.tlcIdx=i; state.currentQ=null; state.path=[]; state.done=false; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+    grid.appendChild(c);
+  });
+  app.appendChild(grid);
+
+  TLCS.forEach(t=>{
+    const sec = document.createElement('div');
+    sec.className = 'ov-tlc-section';
+    sec.innerHTML = `<div class="ov-tlc-header"><div class="ov-tlc-dot" style="background:${t.color}"></div><div class="ov-tlc-name">TLC ${t.num} — ${t.title}</div></div>`;
+
+    // Collect all results
+    const results = [];
+    function walk(q){
+      if(!q) return;
+      if(q.type==='multi'){ q.branches.forEach(b=>results.push({name:b.name,focus:b.focus})); return; }
+      if(q.no && q.no.type==='result') results.push({name:q.no.name,focus:q.no.focus});
+      if(q.no && q.no.type==='sub' && t.subs) walk(t.subs[q.no.id]);
+      if(q.yes && q.yes.type==='result') results.push({name:q.yes.name,focus:q.yes.focus});
+      if(q.yes && q.yes.type==='sub' && t.subs) walk(t.subs[q.yes.id]);
+    }
+    t.qs.forEach(q=>walk(q));
+    if(t.subs) Object.values(t.subs).forEach(q=>{ if(q.type==='multi') walk(q); });
+
+    const list = document.createElement('div');
+    list.className = 'ov-focus-list';
+    [...new Map(results.map(r=>[r.name,r])).values()].forEach(r=>{
+      const item = document.createElement('div');
+      item.className = 'ov-focus-item';
+      item.style.borderLeftColor = t.color;
+      item.style.borderLeftWidth = '3px';
+      item.innerHTML = `<div class="ov-fi-title">${r.name}</div><div class="ov-fi-tags">${r.focus.join(' · ')}</div>`;
+      list.appendChild(item);
+    });
+    sec.appendChild(list);
+    app.appendChild(sec);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
